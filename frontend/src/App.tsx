@@ -118,9 +118,9 @@ export default function App() {
 
     return (
       <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-xl backdrop-blur-sm">
-        <div className="border-b border-slate-200/60 bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
+        <div className="border-b border-slate-200/60 bg-gradient-to-r from-[#2F58CD] to-[#36E2B2] px-6 py-4">
           <div className="text-lg font-bold text-white">🚀 Adicionar Repositório</div>
-          <div className="text-sm text-blue-100">
+          <div className="text-sm text-[#A5F3FC]">
             Adicione um repositório do GitHub para indexação
           </div>
         </div>
@@ -145,7 +145,7 @@ export default function App() {
           )}
 
           <button
-            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl disabled:opacity-60"
+            className="w-full rounded-xl bg-gradient-to-r from-[#2F58CD] to-[#36E2B2] px-6 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:from-[#36E2B2] hover:to-[#2F58CD] hover:shadow-xl disabled:opacity-60"
             onClick={handleSubmit}
             disabled={saving}
           >
@@ -499,9 +499,9 @@ export default function App() {
           ) : (
             <div className="max-w-md mx-auto">
               <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/70 backdrop-blur-sm shadow-xl">
-                <div className="border-b border-slate-200/60 bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+                <div className="border-b border-slate-200/60 bg-gradient-to-r from-[#2F58CD] to-[#36E2B2] px-6 py-4">
                   <div className="text-lg font-bold text-white">✅ Conectado</div>
-                  <div className="text-sm text-green-100">Você está autenticado</div>
+                  <div className="text-sm text-[#A5F3FC]">Você está autenticado</div>
                 </div>
                 <div className="p-6 text-center">
                   <p className="text-slate-600 mb-4">Você está autenticado com sucesso!</p>
