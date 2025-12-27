@@ -1,0 +1,5 @@
+- Use TypeScript in both backend and frontend.
+- Backend must stay modular: every feature lives under `backend/src/modules/<name>` with its own routes + services.
+- Never commit real secrets; keep them in `.env` (gitignored) and document keys in `.env.example`.
+- Public endpoints: list/view blueprints and `/fetch-blueprint`.
+- Restricted endpoints: blueprint upload/update (JWT required).
