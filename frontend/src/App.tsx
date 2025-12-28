@@ -95,6 +95,7 @@ export default function App() {
             favoriteIds={favoriteIds}
             onFavorite={(id) => favoriteMutation.mutate(id)}
             onUnfavorite={(id) => unfavoriteMutation.mutate(id)}
+            isLoggedIn={!!token}
           />
         )}
 

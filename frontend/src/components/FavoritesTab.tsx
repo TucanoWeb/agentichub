@@ -24,6 +24,7 @@ export function FavoritesTab({ favoritesQuery, onUnfavorite }: FavoritesTabProps
               isFavorited={true}
               onFavorite={() => {}} // não usado
               onUnfavorite={() => onUnfavorite(repo.id)}
+              isLoggedIn={true} // sempre true na aba de favoritos
             />
           ))}
         </div>

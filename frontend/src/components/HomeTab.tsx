@@ -12,6 +12,7 @@ interface HomeTabProps {
   favoriteIds: Set<string>;
   onFavorite: (id: string) => void;
   onUnfavorite: (id: string) => void;
+  isLoggedIn: boolean;
 }
 
 export function HomeTab({ 
@@ -22,7 +23,8 @@ export function HomeTab({
   searchReposQuery, 
   favoriteIds, 
   onFavorite, 
-  onUnfavorite 
+  onUnfavorite,
+  isLoggedIn 
 }: HomeTabProps) {
   return (
     <>
@@ -61,6 +63,7 @@ export function HomeTab({
                     isFavorited={favoriteIds.has(repo.id)}
                     onFavorite={() => onFavorite(repo.id)}
                     onUnfavorite={() => onUnfavorite(repo.id)}
+                    isLoggedIn={isLoggedIn}
                   />
                 ))}
               </div>
@@ -92,6 +95,7 @@ export function HomeTab({
                     isFavorited={favoriteIds.has(repo.id)}
                     onFavorite={() => onFavorite(repo.id)}
                     onUnfavorite={() => onUnfavorite(repo.id)}
+                    isLoggedIn={isLoggedIn}
                   />
                 ))}
               </div>
@@ -118,6 +122,7 @@ export function HomeTab({
                     isFavorited={favoriteIds.has(repo.id)}
                     onFavorite={() => onFavorite(repo.id)}
                     onUnfavorite={() => onUnfavorite(repo.id)}
+                    isLoggedIn={isLoggedIn}
                   />
                 ))}
               </div>

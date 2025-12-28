@@ -8,9 +8,10 @@ export interface GitHubRepoCardProps {
   isFavorited: boolean;
   onFavorite: () => void;
   onUnfavorite: () => void;
+  isLoggedIn: boolean;
 }
 
-export function GitHubRepoCard({ repo, isFavorited, onFavorite, onUnfavorite }: GitHubRepoCardProps) {
+export function GitHubRepoCard({ repo, isFavorited, onFavorite, onUnfavorite, isLoggedIn }: GitHubRepoCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const githubInfoQuery = useQuery({
@@ -94,16 +95,27 @@ export function GitHubRepoCard({ repo, isFavorited, onFavorite, onUnfavorite }: 
               🤖 IA
             </button>
             
-            <button
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                isFavorited
-                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                  : 'bg-[#A5F3FC] text-[#2F58CD] hover:bg-[#36E2B2] hover:text-white'
-              }`}
-              onClick={isFavorited ? onUnfavorite : onFavorite}
-            >
-              {isFavorited ? '💔 Desfavoritar' : '⭐ Favoritar'}
-            </button>
+            <div className="relative group">
+              <button
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                  !isLoggedIn
+                    ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                    : isFavorited
+                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                    : 'bg-[#A5F3FC] text-[#2F58CD] hover:bg-[#36E2B2] hover:text-white'
+                }`}
+                onClick={isLoggedIn ? (isFavorited ? onUnfavorite : onFavorite) : undefined}
+                disabled={!isLoggedIn}
+                title={!isLoggedIn ? 'Faça login para favoritar repositórios' : undefined}
+              >
+                {isFavorited ? '💔 Desfavoritar' : '⭐ Favoritar'}
+              </button>
+              {!isLoggedIn && (
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  Necessário Login
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
