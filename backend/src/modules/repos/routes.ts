@@ -159,18 +159,66 @@ export async function registerRepoRoutes(server: Server) {
             // package.json not found or invalid - not critical
           }
 
-          // Get file structure (root directory)
+          // Get enhanced file structure (root + important subdirectories)
           try {
             const contentsResponse = await axios.get(
               `https://api.github.com/repos/${owner}/${cleanRepoName}/contents`
             );
-            fileStructure = contentsResponse.data.map((item: any) => ({
+            
+            const rootItems = contentsResponse.data.map((item: any) => ({
               name: item.name,
               type: item.type,
               path: item.path,
               size: item.size,
-              download_url: item.download_url
+              download_url: item.download_url,
+              children: [] // Will be populated for important directories
             }));
+
+            // Important directories to explore (max 2 levels deep for performance)
+            const importantDirs = [
+              'src', 'lib', 'components', 'pages', 'app', 'api', 'routes', 
+              'controllers', 'services', 'models', 'utils', 'config', 'public',
+              'assets', 'styles', 'css', 'scss', 'hooks', 'context', 'store',
+              'modules', 'features', 'views', 'containers', 'layouts'
+            ];
+
+            // Explore important directories (limited to prevent API abuse)
+            const explorationPromises = rootItems
+              .filter((item: any) => 
+                item.type === 'dir' && 
+                importantDirs.includes(item.name.toLowerCase())
+              )
+              .slice(0, 8) // Limit to max 8 directories to avoid rate limits
+              .map(async (dir: any) => {
+                try {
+                  const subResponse = await axios.get(
+                    `https://api.github.com/repos/${owner}/${cleanRepoName}/contents/${dir.path}`
+                  );
+                  
+                  dir.children = subResponse.data
+                    .slice(0, 20) // Limit items per directory
+                    .map((item: any) => ({
+                      name: item.name,
+                      type: item.type,
+                      path: item.path,
+                      size: item.size,
+                      download_url: item.download_url
+                    }));
+                } catch (err) {
+                  // Skip this directory if fetch fails
+                  dir.children = [];
+                }
+                return dir;
+              });
+
+            // Wait for all subdirectory explorations to complete (with timeout)
+            try {
+              await Promise.all(explorationPromises);
+            } catch (err) {
+              // Some subdirectory explorations failed - continue with what we have
+            }
+
+            fileStructure = rootItems;
           } catch (err) {
             // File structure fetch failed - not critical
           }
@@ -208,7 +256,9 @@ export async function registerRepoRoutes(server: Server) {
             has_package_json: packageJson !== null,
             main_files: fileStructure.filter((f: any) => 
               ['package.json', 'tsconfig.json', 'webpack.config.js', 'vite.config.ts', 
-               'next.config.js', 'tailwind.config.js', 'docker-compose.yml', 'Dockerfile']
+               'next.config.js', 'tailwind.config.js', 'docker-compose.yml', 'Dockerfile',
+               'yarn.lock', 'pnpm-lock.yaml', 'composer.json', 'requirements.txt', 'go.mod',
+               'Cargo.toml', 'pom.xml', 'build.gradle']
               .some(important => f.name.toLowerCase().includes(important.toLowerCase()))
             ).map((f: any) => f.name),
             estimated_stack: packageJson ? [
@@ -216,12 +266,39 @@ export async function registerRepoRoutes(server: Server) {
               ...(packageJson.devDependencies ? Object.keys(packageJson.devDependencies) : [])
             ].filter((dep: string) => 
               ['react', 'vue', 'angular', 'express', 'fastify', 'next', 'nuxt', 
-               'typescript', 'javascript', 'tailwind', 'bootstrap'].some(tech => 
+               'typescript', 'javascript', 'tailwind', 'bootstrap', 'hapi', 'sequelize',
+               'prisma', 'mongoose', 'axios', 'graphql'].some(tech => 
                 dep.toLowerCase().includes(tech)
               )
             ).slice(0, 10) : [],
             folder_structure_summary: fileStructure.filter((f: any) => f.type === 'dir')
-              .map((f: any) => f.name).slice(0, 10)
+              .map((f: any) => f.name).slice(0, 10),
+            architecture_insights: {
+              has_src_folder: fileStructure.some((f: any) => f.name.toLowerCase() === 'src'),
+              has_components: fileStructure.some((f: any) => 
+                f.name.toLowerCase() === 'components' || 
+                (f.children && f.children.length > 0 && f.children.some((c: any) => c.name.toLowerCase().includes('component')))
+              ),
+              has_api_routes: fileStructure.some((f: any) => 
+                ['api', 'routes', 'controllers'].includes(f.name.toLowerCase())
+              ),
+              has_tests: fileStructure.some((f: any) => 
+                f.name.toLowerCase().includes('test') || 
+                f.name.toLowerCase().includes('spec') ||
+                f.name === '__tests__'
+              ),
+              monorepo_structure: fileStructure.filter((f: any) => f.type === 'dir').length > 8,
+              explored_directories: fileStructure
+                .filter((f: any) => f.type === 'dir' && f.children && f.children.length > 0)
+                .map((f: any) => ({
+                  name: f.name,
+                  file_count: f.children.length,
+                  main_files: f.children
+                    .filter((c: any) => c.type === 'file')
+                    .map((c: any) => c.name)
+                    .slice(0, 10)
+                }))
+            }
           }
         }).code(200);
       } catch (err) {
