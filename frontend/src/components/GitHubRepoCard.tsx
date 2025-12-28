@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getGitHubRepoInfo, getGitHubRepoLanguages, type GitHubRepo } from '../api/repos';
+import { getGitHubRepoInfo, getGitHubRepoLanguages, fetchRepoForAgent, type GitHubRepo } from '../api/repos';
 import { AIPromptModal } from './AIPromptModal';
+import FileStructureModal from './FileStructureModal';
 
 // Language colors based on GitHub's language colors
 const languageColors: { [key: string]: string } = {
@@ -67,6 +68,7 @@ export interface GitHubRepoCardProps {
 
 export function GitHubRepoCard({ repo, isFavorited, onFavorite, onUnfavorite, isLoggedIn }: GitHubRepoCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isStructureModalOpen, setIsStructureModalOpen] = useState(false);
   
   const githubInfoQuery = useQuery({
     queryKey: ['github-repo', repo.github_url],
@@ -82,8 +84,17 @@ export function GitHubRepoCard({ repo, isFavorited, onFavorite, onUnfavorite, is
     gcTime: 30 * 60 * 1000, // 30 minutes
   });
 
+  const repoDetailQuery = useQuery({
+    queryKey: ['repo-detail', repo.id],
+    queryFn: () => fetchRepoForAgent(repo.id),
+    enabled: isStructureModalOpen, // Only fetch when modal is opened
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+  });
+
   const githubInfo = githubInfoQuery.data;
   const languages = languagesQuery.data;
+  const repoDetail = repoDetailQuery.data;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-lg transition-all hover:shadow-xl backdrop-blur-sm">
@@ -253,6 +264,13 @@ export function GitHubRepoCard({ repo, isFavorited, onFavorite, onUnfavorite, is
               🤖 IA
             </button>
             
+            <button
+              className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-[#36E2B2] to-[#2F58CD] text-white hover:from-[#2F58CD] hover:to-[#36E2B2] transition-all"
+              onClick={() => setIsStructureModalOpen(true)}
+            >
+              📁 Estrutura
+            </button>
+            
             <div className="relative group">
               <button
                 className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
@@ -284,6 +302,16 @@ export function GitHubRepoCard({ repo, isFavorited, onFavorite, onUnfavorite, is
           githubInfo={githubInfo}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+      
+      {isStructureModalOpen && (
+        <FileStructureModal
+          isOpen={isStructureModalOpen}
+          onClose={() => setIsStructureModalOpen(false)}
+          fileStructure={repoDetail?.file_structure}
+          aiContext={repoDetail?.ai_context}
+          repoName={githubInfo?.name || repo.github_url.split('/').pop()}
         />
       )}
     </div>

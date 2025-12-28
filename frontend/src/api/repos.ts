@@ -8,9 +8,47 @@ export interface GitHubRepo {
   favorite_count?: number;
 }
 
+export interface FileStructureItem {
+  name: string;
+  type: 'file' | 'dir';
+  path: string;
+  size: number;
+  download_url: string;
+  children?: FileStructureItem[];
+}
+
+export interface AIContext {
+  primary_language: string;
+  description: string;
+  topics: string[];
+  has_package_json: boolean;
+  main_files: string[];
+  estimated_stack: string[];
+  folder_structure_summary: string[];
+  architecture_insights: {
+    has_src_folder: boolean;
+    has_components: boolean;
+    has_api_routes: boolean;
+    has_tests: boolean;
+    monorepo_structure: boolean;
+    explored_directories: Array<{
+      name: string;
+      file_count: number;
+      main_files: string[];
+    }>;
+  };
+}
+
 export interface GitHubRepoDetail extends GitHubRepo {
   readme?: string;
+  readme_file?: string | null;
   raw_base_url?: string;
+  //eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata?: any;
+  //eslint-disable-next-line @typescript-eslint/no-explicit-any
+  package_json?: any;
+  file_structure?: FileStructureItem[];
+  ai_context?: AIContext;
 }
 
 export interface GitHubApiRepo {
