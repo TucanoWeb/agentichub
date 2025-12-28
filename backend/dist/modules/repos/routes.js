@@ -8,6 +8,17 @@ const joi_1 = __importDefault(require("joi"));
 const validators_1 = require("./validators");
 const service_1 = require("./service");
 const axios_1 = __importDefault(require("axios"));
+// GitHub API helper with authentication
+const createGitHubRequest = () => {
+    const config = {};
+    if (process.env.TOKEN_GITHUB) {
+        config.headers = {
+            'Authorization': `token ${process.env.TOKEN_GITHUB}`,
+            'User-Agent': 'AgenticHub/1.0'
+        };
+    }
+    return config;
+};
 async function registerRepoRoutes(server) {
     // Public routes
     server.route({
@@ -67,6 +78,73 @@ async function registerRepoRoutes(server) {
             }
         }
     });
+    // GitHub API endpoints (authenticated)
+    server.route({
+        method: 'GET',
+        path: '/github/repo-info',
+        options: {
+            auth: false,
+            validate: {
+                query: joi_1.default.object({
+                    github_url: joi_1.default.string().uri().required()
+                })
+            }
+        },
+        handler: async (req, h) => {
+            const { github_url } = req.query;
+            try {
+                const match = github_url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+                if (!match) {
+                    return h.response({ error: 'Invalid GitHub URL format' }).code(400);
+                }
+                const [, owner, repo] = match;
+                const cleanRepo = repo.replace(/\.git$/, '');
+                const response = await axios_1.default.get(`https://api.github.com/repos/${owner}/${cleanRepo}`, createGitHubRequest());
+                return h.response({
+                    name: response.data.name,
+                    full_name: response.data.full_name,
+                    description: response.data.description,
+                    stargazers_count: response.data.stargazers_count,
+                    language: response.data.language,
+                    owner: {
+                        login: response.data.owner.login,
+                        avatar_url: response.data.owner.avatar_url
+                    }
+                }).code(200);
+            }
+            catch (err) {
+                return h.response({ error: 'Repository not found' }).code(404);
+            }
+        }
+    });
+    server.route({
+        method: 'GET',
+        path: '/github/repo-languages',
+        options: {
+            auth: false,
+            validate: {
+                query: joi_1.default.object({
+                    github_url: joi_1.default.string().uri().required()
+                })
+            }
+        },
+        handler: async (req, h) => {
+            const { github_url } = req.query;
+            try {
+                const match = github_url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+                if (!match) {
+                    return h.response({ error: 'Invalid GitHub URL format' }).code(400);
+                }
+                const [, owner, repo] = match;
+                const cleanRepo = repo.replace(/\.git$/, '');
+                const response = await axios_1.default.get(`https://api.github.com/repos/${owner}/${cleanRepo}/languages`, createGitHubRequest());
+                return h.response(response.data).code(200);
+            }
+            catch (err) {
+                return h.response({}).code(200); // Return empty object if languages not found
+            }
+        }
+    });
     // Agent endpoint - fetches comprehensive repository data for AI agents
     server.route({
         method: 'GET',
@@ -117,7 +195,7 @@ async function registerRepoRoutes(server) {
                 let fileStructure = [];
                 try {
                     // Get repo metadata
-                    const metadataResponse = await axios_1.default.get(`https://api.github.com/repos/${owner}/${cleanRepoName}`);
+                    const metadataResponse = await axios_1.default.get(`https://api.github.com/repos/${owner}/${cleanRepoName}`, createGitHubRequest());
                     repoMetadata = {
                         name: metadataResponse.data.name,
                         full_name: metadataResponse.data.full_name,
@@ -142,7 +220,7 @@ async function registerRepoRoutes(server) {
                     }
                     // Get enhanced file structure (root + important subdirectories)
                     try {
-                        const contentsResponse = await axios_1.default.get(`https://api.github.com/repos/${owner}/${cleanRepoName}/contents`);
+                        const contentsResponse = await axios_1.default.get(`https://api.github.com/repos/${owner}/${cleanRepoName}/contents`, createGitHubRequest());
                         const rootItems = contentsResponse.data.map((item) => ({
                             name: item.name,
                             type: item.type,
@@ -165,7 +243,7 @@ async function registerRepoRoutes(server) {
                             .slice(0, 8) // Limit to max 8 directories to avoid rate limits
                             .map(async (dir) => {
                             try {
-                                const subResponse = await axios_1.default.get(`https://api.github.com/repos/${owner}/${cleanRepoName}/contents/${dir.path}`);
+                                const subResponse = await axios_1.default.get(`https://api.github.com/repos/${owner}/${cleanRepoName}/contents/${dir.path}`, createGitHubRequest());
                                 dir.children = subResponse.data
                                     .slice(0, 20) // Limit items per directory
                                     .map((item) => ({
