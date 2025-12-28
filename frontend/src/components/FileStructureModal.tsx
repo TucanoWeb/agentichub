@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import type { FileStructureItem, AIContext } from "../api/repos";
 
 interface FileStructureModalProps {
@@ -50,24 +51,30 @@ const FileStructureModal: React.FC<FileStructureModalProps> = ({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+  const modalContent = (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-[#2F58CD] to-[#36E2B2] p-4 text-white">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold">📁 Estrutura do Projeto: {repoName}</h2>
             <button
               onClick={onClose}
-              className="text-white hover:text-slate-200 text-xl leading-none"
+              className="text-white hover:text-slate-200 text-2xl leading-none font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
             >
               ×
             </button>
           </div>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-12rem)]">
+          <div className="grid lg:grid-cols-2 gap-6">
             {/* AI Context Summary */}
             {aiContext && (
               <div className="space-y-4">
@@ -196,7 +203,8 @@ const FileStructureModal: React.FC<FileStructureModalProps> = ({
                 </div>
               ) : (
                 <div className="text-center py-8 text-slate-500">
-                  <p>Estrutura de arquivos não disponível</p>
+                  <div className="animate-spin mx-auto mb-4 h-6 w-6 border-4 border-slate-400 border-t-transparent rounded-full"></div>
+                  <p>Carregando Estrutura de Arquivos</p>
                 </div>
               )}
             </div>
@@ -217,6 +225,8 @@ const FileStructureModal: React.FC<FileStructureModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default FileStructureModal;
