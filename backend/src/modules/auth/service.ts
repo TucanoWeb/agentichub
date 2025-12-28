@@ -5,6 +5,7 @@ import { env } from '../../config/env';
 import { PasswordResetToken } from '../../db/models/PasswordResetToken';
 import { User } from '../../db/models/User';
 import { sendEmail } from '../email/service';
+import { createWelcomeEmailTemplate, createAdminNotificationTemplate, createPasswordResetTemplate } from '../email/templates';
 
 export async function registerUser(input: { email: string; password: string }) {
   const existing = await User.findOne({ where: { email: input.email } });
@@ -12,6 +13,35 @@ export async function registerUser(input: { email: string; password: string }) {
 
   const passwordHash = await bcrypt.hash(input.password, 12);
   const user = await User.create({ email: input.email, passwordHash } as any);
+  
+  // Enviar email de boas-vindas para o usuário
+  try {
+    const welcomeTemplate = createWelcomeEmailTemplate(user.email);
+    await sendEmail({
+      to: user.email,
+      subject: welcomeTemplate.subject,
+      html: welcomeTemplate.html,
+      text: welcomeTemplate.text
+    });
+  } catch (emailError) {
+    console.warn('Falha ao enviar email de boas-vindas:', emailError);
+    // Não falha o registro se o email falhar
+  }
+  
+  // Enviar notificação para o administrador
+  try {
+    const adminTemplate = createAdminNotificationTemplate(user.email);
+    await sendEmail({
+      to: 'suporte@tucanoweb.com.br',
+      subject: adminTemplate.subject,
+      html: adminTemplate.html,
+      text: adminTemplate.text
+    });
+  } catch (emailError) {
+    console.warn('Falha ao enviar notificação para admin:', emailError);
+    // Não falha o registro se o email falhar
+  }
+  
   return { id: user.id, email: user.email };
 }
 
@@ -42,11 +72,14 @@ export async function requestPasswordReset(input: { email: string }) {
 
   await PasswordResetToken.create({ user_id: user.id, tokenHash, expiresAt, usedAt: null } as any);
 
-  // Minimal email content; frontend can provide UI to paste token.
-  const subject = 'AgenticHub - Reset de senha';
-  const text = `Use este token para resetar sua senha:\n\n${token}\n\nEle expira em 1 hora.`;
-
-  await sendEmail({ to: user.email, subject, text });
+  // Email moderno de reset de senha
+  const resetTemplate = createPasswordResetTemplate(token);
+  await sendEmail({ 
+    to: user.email, 
+    subject: resetTemplate.subject, 
+    html: resetTemplate.html,
+    text: resetTemplate.text 
+  });
   return { ok: true };
 }
 
