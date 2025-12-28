@@ -26,5 +26,7 @@ export const env = {
     clientId: required('GMAIL_CLIENT_ID'),
     clientSecret: required('GMAIL_CLIENT_SECRET'),
     refreshToken: required('GMAIL_REFRESH_TOKEN')
-  }
+  },
+
+  frontendUrl: required('FRONTEND_URL')
 };

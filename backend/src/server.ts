@@ -10,7 +10,7 @@ export async function createServer() {
     host: '0.0.0.0',
     routes: {
       cors: {
-        origin: ['*'],
+        origin: ['localhost:5173', 'http://localhost:5173', env.frontendUrl || 'http://localhost:5173'],
         additionalHeaders: ['authorization', 'content-type']
       }
     }
