@@ -24,6 +24,8 @@ export function AIPromptModal({ repo, githubInfo, isOpen, onClose }: AIPromptMod
   const repoDescription = githubInfo?.description || "Sem descrição disponível";
   const ownerName = githubInfo?.owner.login || "desenvolvedor";
   const primaryLanguage = githubInfo?.language || "linguagem não identificada";
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
+  const agentEndpoint = `${apiUrl}/fetch-blueprint?id=${repo.id}`;
   const tags = repo.tags
     ? repo.tags
         .split(",")
@@ -36,16 +38,27 @@ export function AIPromptModal({ repo, githubInfo, isOpen, onClose }: AIPromptMod
       id: "analysis",
       title: "📋 Análise de Repositório",
       description: "Análise completa do projeto e padrões arquiteturais",
-      prompt: `Analise este repositório do GitHub: ${repo.github_url}
+      prompt: `Use o endpoint especializado do AgenticHub para analisar este repositório:
+
+🔗 **Endpoint para Agentes:** ${agentEndpoint}
+
+Este endpoint retorna dados estruturados especificamente para IA, incluindo:
+- README completo
+- Estrutura de arquivos
+- Dependências (package.json)
+- Metadados do GitHub
+- URLs raw para arquivos principais
+- Contexto otimizado para agentes
 
 Detalhes do projeto:
 - Nome: ${repoName}
-- Desenvolvedor: ${ownerName}
+- Desenvolvedor: ${ownerName}  
 - Linguagem principal: ${primaryLanguage}
 - Descrição: ${repoDescription}
 - Tags: ${tags}
+- GitHub: ${repo.github_url}
 
-Por favor:
+Com base nos dados do endpoint, por favor:
 1. Identifique os padrões arquiteturais usados
 2. Liste as dependências e tecnologias principais
 3. Explique a estrutura do projeto
@@ -58,20 +71,26 @@ Contexto: Preciso entender este projeto para aplicar conceitos similares em meu 
       id: "implementation",
       title: "🔧 Implementação Prática",
       description: "Gere código baseado neste repositório",
-      prompt: `Baseado no repositório ${repoName} (${repo.github_url}), crie uma implementação similar para meu projeto.
+      prompt: `Use o endpoint especializado do AgenticHub para implementar uma solução similar:
+
+🔗 **Endpoint para Agentes:** ${agentEndpoint}
+
+Este endpoint fornece dados estruturados incluindo código, dependências e contexto completo.
 
 Informações do repositório base:
+- Nome: ${repoName}
 - Tecnologia: ${primaryLanguage}
 - Descrição: ${repoDescription}
 - Tags: ${tags}
 - Autor: ${ownerName}
+- GitHub: ${repo.github_url}
 
 Requisitos para minha implementação:
 - [SUBSTITUA: Descreva suas tecnologias específicas]
 - [SUBSTITUA: Defina sua arquitetura desejada]
 - [SUBSTITUA: Liste funcionalidades extras necessárias]
 
-Por favor gere:
+Com base nos dados estruturados do endpoint, por favor gere:
 1. Estrutura de arquivos e pastas
 2. Dependências necessárias (package.json, requirements.txt, etc.)
 3. Código principal da implementação
@@ -84,13 +103,18 @@ Mantenha as melhores práticas identificadas no repositório original.`,
       id: "migration",
       title: "🚀 Migração/Adaptação",
       description: "Adapte este projeto para seu stack tecnológico",
-      prompt: `Quero adaptar a implementação do projeto ${repoName} para meu stack atual.
+      prompt: `Use o endpoint do AgenticHub para adaptar este projeto ao meu stack:
+
+🔗 **Endpoint para Agentes:** ${agentEndpoint}
+
+Este endpoint retorna estrutura completa, dependências e código otimizado para análise por IA.
 
 Repositório original:
-- URL: ${repo.github_url}
+- Nome: ${repoName}
 - Linguagem: ${primaryLanguage}
 - Descrição: ${repoDescription}
 - Conceitos: ${tags}
+- GitHub: ${repo.github_url}
 
 Meu ambiente atual:
 - [SUBSTITUA: Framework/linguagem desejado]
@@ -98,7 +122,7 @@ Meu ambiente atual:
 - [SUBSTITUA: Arquitetura de deployment]
 - [SUBSTITUA: Outras especificações]
 
-Preciso de ajuda para:
+Com base nos dados estruturados do endpoint, preciso de ajuda para:
 1. Identificar equivalentes das dependências
 2. Adaptar a arquitetura para meu contexto
 3. Converter padrões de código
@@ -111,15 +135,20 @@ Foque em manter a essência e qualidade da solução original.`,
       id: "learning",
       title: "🎓 Aprendizado Guiado",
       description: "Aprenda conceitos através deste projeto",
-      prompt: `Use o repositório ${repoName} como base para me ensinar conceitos avançados.
+      prompt: `Use o endpoint AgenticHub para me ensinar conceitos avançados através deste projeto:
+
+🔗 **Endpoint para Agentes:** ${agentEndpoint}
+
+Este endpoint fornece README completo, estrutura de arquivos, dependências e contexto otimizado.
 
 Projeto de estudo:
+- Nome: ${repoName}
 - Repositório: ${repo.github_url}
 - Tecnologia: ${primaryLanguage}
 - Área: ${tags}
 - Descrição: ${repoDescription}
 
-Por favor, me explique:
+Com base nos dados estruturados do endpoint, por favor me explique:
 1. **Conceitos Fundamentais**: Quais princípios de programação são aplicados?
 2. **Padrões de Design**: Que patterns arquiteturais posso identificar?
 3. **Boas Práticas**: O que este código faz bem que posso aplicar?
@@ -132,15 +161,20 @@ Quero entender não só o "como", mas principalmente o "por quê" das decisões 
       id: "debugging",
       title: "🐛 Análise e Debug",
       description: "Identifique possíveis problemas e melhorias",
-      prompt: `Analise o repositório ${repoName} focando em qualidade de código e possíveis problemas.
+      prompt: `Use o endpoint AgenticHub para uma análise profunda de qualidade e debugging:
+
+🔗 **Endpoint para Agentes:** ${agentEndpoint}
+
+Este endpoint oferece acesso estruturado ao código, README, dependências e arquivos principais.
 
 Repositório para análise:
+- Nome: ${repoName}
 - URL: ${repo.github_url}
 - Stack: ${primaryLanguage}
 - Contexto: ${repoDescription}
 - Tags: ${tags}
 
-Por favor, avalie:
+Com base nos dados completos do endpoint, por favor avalie:
 1. **Problemas de Segurança**: Vulnerabilidades ou práticas inseguras
 2. **Performance**: Gargalos ou otimizações possíveis
 3. **Manutenibilidade**: Código limpo, organização, documentação
@@ -149,6 +183,50 @@ Por favor, avalie:
 6. **Dependências**: Bibliotecas desatualizadas ou desnecessárias
 
 Forneça sugestões práticas de melhorias com exemplos de código quando necessário.`,
+    },
+    {
+      id: "specific-feature",
+      title: "⚡ Funcionalidade Específica",
+      description: "Extraia e implemente apenas uma funcionalidade específica",
+      prompt: `Use o endpoint AgenticHub para implementar uma funcionalidade específica deste repositório:
+
+🔗 **Endpoint para Agentes:** ${agentEndpoint}
+
+Este endpoint fornece acesso estruturado ao código, dependências e arquivos do projeto.
+
+Repositório de referência:
+- Nome: ${repoName}
+- Tecnologia: ${primaryLanguage}
+- Descrição: ${repoDescription}
+- Tags: ${tags}
+- GitHub: ${repo.github_url}
+
+🎯 **Funcionalidade desejada:**
+[SUBSTITUA: Descreva especificamente qual módulo/funcionalidade você quer extrair]
+
+Exemplos de funcionalidades específicas:
+• Sistema de autenticação (login, registro, JWT)
+• Módulo de envio de emails (templates, SMTP, notificações)
+• Sistema de upload de arquivos (storage, validação, processamento)
+• Componente de busca/filtros (queries, pagination, sorting)
+• Sistema de cache/redis (configuração, helpers, invalidação)
+• Módulo de pagamentos (integração, webhooks, validação)
+• Sistema de logs/monitoramento (tracking, métricas, alertas)
+
+**Meu stack atual:**
+- Framework: [SUBSTITUA: ex: React, Vue, Angular, Express, NestJS]
+- Database: [SUBSTITUA: ex: PostgreSQL, MongoDB, MySQL]
+- Ambiente: [SUBSTITUA: ex: Node.js, Python, Java, .NET]
+
+Com base nos dados do endpoint, por favor:
+1. **Identifique** onde está implementada a funcionalidade no repositório original
+2. **Extraia** apenas os arquivos/código relacionados à funcionalidade específica
+3. **Adapte** o código para meu stack atual
+4. **Liste** as dependências necessárias apenas para esta funcionalidade
+5. **Forneça** instruções de integração no meu projeto existente
+6. **Sugira** testes unitários para a funcionalidade implementada
+
+Foco: Implementar APENAS a funcionalidade solicitada, não o projeto completo.`,
     },
   ];
 
@@ -238,8 +316,18 @@ Forneça sugestões práticas de melhorias com exemplos de código quando necess
               <li>
                 4. Substitua os campos marcados com [SUBSTITUA: ...] pelas suas especificações
               </li>
-              <li>5. Execute e refine conforme necessário!</li>
+              <li>5. O agente usará o endpoint AgenticHub para dados estruturados!</li>
             </ol>
+            <div className="mt-3 p-3 bg-white rounded-lg border border-[#36E2B2]/50">
+              <h5 className="font-semibold text-[#2F58CD] text-xs mb-1">
+                🚀 Diferencial AgenticHub:
+              </h5>
+              <p className="text-xs text-[#2F58CD]">
+                Nossos prompts usam <strong>endpoints especializados</strong> que entregam código
+                "mastigado" para IA, com README, dependências, estrutura de arquivos e contexto
+                otimizado - muito além de um simples link do GitHub!
+              </p>
+            </div>
           </div>
         </div>
       </div>
