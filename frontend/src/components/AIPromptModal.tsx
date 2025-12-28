@@ -8,7 +8,7 @@ interface AIPromptModalProps {
     name: string;
     description: string | null;
     owner: { login: string };
-    language?: string;
+    language: string;
   };
   isOpen: boolean;
   onClose: () => void;

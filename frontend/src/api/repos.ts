@@ -18,10 +18,15 @@ export interface GitHubApiRepo {
   full_name: string;
   description: string | null;
   stargazers_count: number;
+  language: string;
   owner: {
     login: string;
     avatar_url: string;
   };
+}
+
+export interface GitHubRepoLanguages {
+  [language: string]: number;
 }
 
 export async function getRecentRepos(): Promise<GitHubRepo[]> {
@@ -64,6 +69,20 @@ export async function getGitHubRepoInfo(githubUrl: string): Promise<GitHubApiRep
 
   const response = await fetch(`https://api.github.com/repos/${owner}/${cleanRepo}`);
   if (!response.ok) throw new Error("Repository not found");
+
+  return response.json();
+}
+
+export async function getGitHubRepoLanguages(githubUrl: string): Promise<GitHubRepoLanguages> {
+  // eslint-disable-next-line no-useless-escape
+  const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  if (!match) throw new Error("Invalid GitHub URL");
+
+  const [, owner, repo] = match;
+  const cleanRepo = repo.replace(/\.git$/, "");
+
+  const response = await fetch(`https://api.github.com/repos/${owner}/${cleanRepo}/languages`);
+  if (!response.ok) return {};
 
   return response.json();
 }
