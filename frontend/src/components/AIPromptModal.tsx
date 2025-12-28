@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { createPortal } from 'react-dom';
-import type { GitHubRepo } from '../api/repos';
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import type { GitHubRepo } from "../api/repos";
 
 interface AIPromptModalProps {
   repo: GitHubRepo;
@@ -20,17 +20,22 @@ export function AIPromptModal({ repo, githubInfo, isOpen, onClose }: AIPromptMod
 
   if (!isOpen) return null;
 
-  const repoName = githubInfo?.name || 'repositório';
-  const repoDescription = githubInfo?.description || 'Sem descrição disponível';
-  const ownerName = githubInfo?.owner.login || 'desenvolvedor';
-  const primaryLanguage = githubInfo?.language || 'linguagem não identificada';
-  const tags = repo.tags ? repo.tags.split(',').map(tag => tag.trim()).join(', ') : '';
+  const repoName = githubInfo?.name || "repositório";
+  const repoDescription = githubInfo?.description || "Sem descrição disponível";
+  const ownerName = githubInfo?.owner.login || "desenvolvedor";
+  const primaryLanguage = githubInfo?.language || "linguagem não identificada";
+  const tags = repo.tags
+    ? repo.tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .join(", ")
+    : "";
 
   const templates = [
     {
-      id: 'analysis',
-      title: '📋 Análise de Repositório',
-      description: 'Análise completa do projeto e padrões arquiteturais',
+      id: "analysis",
+      title: "📋 Análise de Repositório",
+      description: "Análise completa do projeto e padrões arquiteturais",
       prompt: `Analise este repositório do GitHub: ${repo.github_url}
 
 Detalhes do projeto:
@@ -47,12 +52,12 @@ Por favor:
 4. Destaque pontos interessantes da implementação
 5. Sugira possíveis melhorias ou adaptações
 
-Contexto: Preciso entender este projeto para aplicar conceitos similares em meu desenvolvimento.`
+Contexto: Preciso entender este projeto para aplicar conceitos similares em meu desenvolvimento.`,
     },
     {
-      id: 'implementation',
-      title: '🔧 Implementação Prática',
-      description: 'Gere código baseado neste repositório',
+      id: "implementation",
+      title: "🔧 Implementação Prática",
+      description: "Gere código baseado neste repositório",
       prompt: `Baseado no repositório ${repoName} (${repo.github_url}), crie uma implementação similar para meu projeto.
 
 Informações do repositório base:
@@ -73,12 +78,12 @@ Por favor gere:
 4. Configurações importantes
 5. Instruções de setup e execução
 
-Mantenha as melhores práticas identificadas no repositório original.`
+Mantenha as melhores práticas identificadas no repositório original.`,
     },
     {
-      id: 'migration',
-      title: '🚀 Migração/Adaptação',
-      description: 'Adapte este projeto para seu stack tecnológico',
+      id: "migration",
+      title: "🚀 Migração/Adaptação",
+      description: "Adapte este projeto para seu stack tecnológico",
       prompt: `Quero adaptar a implementação do projeto ${repoName} para meu stack atual.
 
 Repositório original:
@@ -100,12 +105,12 @@ Preciso de ajuda para:
 4. Manter as funcionalidades principais
 5. Otimizar para meu caso de uso específico
 
-Foque em manter a essência e qualidade da solução original.`
+Foque em manter a essência e qualidade da solução original.`,
     },
     {
-      id: 'learning',
-      title: '🎓 Aprendizado Guiado',
-      description: 'Aprenda conceitos através deste projeto',
+      id: "learning",
+      title: "🎓 Aprendizado Guiado",
+      description: "Aprenda conceitos através deste projeto",
       prompt: `Use o repositório ${repoName} como base para me ensinar conceitos avançados.
 
 Projeto de estudo:
@@ -121,12 +126,12 @@ Por favor, me explique:
 4. **Tecnologias**: Como as ferramentas são integradas efetivamente?
 5. **Próximos Passos**: Como posso expandir meu conhecimento baseado neste exemplo?
 
-Quero entender não só o "como", mas principalmente o "por quê" das decisões técnicas.`
+Quero entender não só o "como", mas principalmente o "por quê" das decisões técnicas.`,
     },
     {
-      id: 'debugging',
-      title: '🐛 Análise e Debug',
-      description: 'Identifique possíveis problemas e melhorias',
+      id: "debugging",
+      title: "🐛 Análise e Debug",
+      description: "Identifique possíveis problemas e melhorias",
       prompt: `Analise o repositório ${repoName} focando em qualidade de código e possíveis problemas.
 
 Repositório para análise:
@@ -143,8 +148,8 @@ Por favor, avalie:
 5. **Testes**: Cobertura e qualidade dos testes
 6. **Dependências**: Bibliotecas desatualizadas ou desnecessárias
 
-Forneça sugestões práticas de melhorias com exemplos de código quando necessário.`
-    }
+Forneça sugestões práticas de melhorias com exemplos de código quando necessário.`,
+    },
   ];
 
   const copyToClipboard = async (text: string, templateId: string) => {
@@ -153,7 +158,7 @@ Forneça sugestões práticas de melhorias com exemplos de código quando necess
       setCopiedTemplate(templateId);
       setTimeout(() => setCopiedTemplate(null), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
     }
   };
 
@@ -169,10 +174,7 @@ Forneça sugestões práticas de melhorias com exemplos de código quando necess
                 {repoName} • {primaryLanguage}
               </p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-[#A5F3FC] transition-colors"
-            >
+            <button onClick={onClose} className="text-white hover:text-[#A5F3FC] transition-colors">
               <span className="text-2xl">×</span>
             </button>
           </div>
@@ -193,23 +195,27 @@ Forneça sugestões práticas de melhorias com exemplos de código quando necess
                       onClick={() => copyToClipboard(template.prompt, template.id)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         copiedTemplate === template.id
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-[#A5F3FC] text-[#2F58CD] hover:bg-[#36E2B2] hover:text-white'
+                          ? "bg-green-100 text-green-700"
+                          : "bg-[#A5F3FC] text-[#2F58CD] hover:bg-[#36E2B2] hover:text-white"
                       }`}
                     >
-                      {copiedTemplate === template.id ? '✅ Copiado!' : '📋 Copiar'}
+                      {copiedTemplate === template.id ? "✅ Copiado!" : "📋 Copiar"}
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="p-4">
                   <button
-                    onClick={() => setSelectedTemplate(selectedTemplate === template.id ? null : template.id)}
+                    onClick={() =>
+                      setSelectedTemplate(selectedTemplate === template.id ? null : template.id)
+                    }
                     className="w-full text-left text-sm text-slate-600 hover:text-slate-800 transition-colors"
                   >
-                    {selectedTemplate === template.id ? '🔽 Ocultar preview' : '👁️ Ver preview do prompt'}
+                    {selectedTemplate === template.id
+                      ? "🔽 Ocultar preview"
+                      : "👁️ Ver preview do prompt"}
                   </button>
-                  
+
                   {selectedTemplate === template.id && (
                     <div className="mt-3 bg-slate-900 rounded-lg p-4">
                       <pre className="text-green-400 text-xs whitespace-pre-wrap overflow-x-auto">
@@ -229,7 +235,9 @@ Forneça sugestões práticas de melhorias com exemplos de código quando necess
               <li>1. Escolha o template que melhor se adapta ao seu objetivo</li>
               <li>2. Clique em "📋 Copiar" para copiar o prompt</li>
               <li>3. Cole no chat do seu agente IA (Cursor, GitHub Copilot, ChatGPT, etc.)</li>
-              <li>4. Substitua os campos marcados com [SUBSTITUA: ...] pelas suas especificações</li>
+              <li>
+                4. Substitua os campos marcados com [SUBSTITUA: ...] pelas suas especificações
+              </li>
               <li>5. Execute e refine conforme necessário!</li>
             </ol>
           </div>
