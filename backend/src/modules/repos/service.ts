@@ -13,17 +13,18 @@ export async function listRecentRepos(limit = 10) {
 
 export async function listMostFavoritedRepos(limit = 20) {
   try {
-    // Consulta SQL raw para obter repos com contagem de favoritos
+    // Consulta SQL raw para obter repos com contagem de favoritos (apenas os que foram favoritados)
     const repos = await sequelize.query(`
       SELECT 
         gr.id,
         gr.github_url,
         gr.tags,
         gr.created_at,
-        COALESCE(COUNT(f.id), 0) as favorite_count
+        COUNT(f.id) as favorite_count
       FROM github_repos gr
-      LEFT JOIN favorites f ON gr.id = f.repo_id
+      INNER JOIN favorites f ON gr.id = f.repo_id
       GROUP BY gr.id, gr.github_url, gr.tags, gr.created_at
+      HAVING COUNT(f.id) > 0
       ORDER BY favorite_count DESC, gr.created_at DESC
       LIMIT :limit
     `, {
@@ -34,12 +35,8 @@ export async function listMostFavoritedRepos(limit = 20) {
     return repos;
   } catch (error) {
     console.error('Error in listMostFavoritedRepos:', error);
-    // Se der erro, retorna lista de repositórios ordenados por data como fallback
-    return GitHubRepo.findAll({
-      order: [['created_at', 'DESC']],
-      limit,
-      raw: true
-    });
+    // Em caso de erro, retorna array vazio ao invés de fallback
+    return [];
   }
 }
 
