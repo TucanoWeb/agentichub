@@ -8,12 +8,13 @@ const joi_1 = __importDefault(require("joi"));
 const validators_1 = require("./validators");
 const service_1 = require("./service");
 const axios_1 = __importDefault(require("axios"));
+const env_1 = require("../../config/env");
 // GitHub API helper with authentication
 const createGitHubRequest = () => {
     const config = {};
-    if (process.env.TOKEN_GITHUB) {
+    if (env_1.env.tokenGitHub) {
         config.headers = {
-            'Authorization': `token ${process.env.TOKEN_GITHUB}`,
+            'Authorization': `token ${env_1.env.tokenGitHub}`,
             'User-Agent': 'AgenticHub/1.0'
         };
     }

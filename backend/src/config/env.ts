@@ -28,5 +28,7 @@ export const env = {
     refreshToken: required('GMAIL_REFRESH_TOKEN')
   },
 
-  frontendUrl: required('FRONTEND_URL')
+  frontendUrl: required('FRONTEND_URL'),
+
+  tokenGitHub: required('TOKEN_GITHUB')
 };
