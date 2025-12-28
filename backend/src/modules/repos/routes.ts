@@ -14,14 +14,15 @@ import {
   searchRepos
 } from './service';
 import axios from 'axios';
+import { env } from '../../config/env';
 
 // GitHub API helper with authentication
 const createGitHubRequest = () => {
   const config: any = {};
   
-  if (process.env.TOKEN_GITHUB) {
+  if (env.tokenGitHub) {
     config.headers = {
-      'Authorization': `token ${process.env.TOKEN_GITHUB}`,
+      'Authorization': `token ${env.tokenGitHub}`,
       'User-Agent': 'AgenticHub/1.0'
     };
   }
